@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Market analysis</title>
+        <link rel="stylesheet" href="{% static 'sector_analysis/style.css' %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script>
+            DJANGO_STATIC_URL = '{{STATIC_URL}}';
+            function remove_comp_buttons(){
+                while(document.getElementById("comp_nav").getElementsByTagName("button").length>0){
+                    btn = document.getElementById("comp_nav").getElementsByTagName("button")[0];
+                    btn.remove();
+
+                }
+            }
+            function printname(event) {
+                console.log(this.innerHTML);
+            }     
+
+            function create_buttons(){
+                var tikrs = ["BRITANNIA", "HINDUNILVR", "ITC"];
+                remove_comp_buttons();
+               
+                for (i = 0, len = tikrs.length, text = ""; i < len; i++) {
+                    var div = document.getElementById('comp_nav');
+                    var btn = document.createElement("BUTTON");
+                    btn.style.margin = "10px 10px 10px 10px"
+                    btn.innerHTML = tikrs[i];
+                    btn.id = 'comp_'+tikrs[i];
+                    btn.className = 'comp_';
+                    // var event = document.getElementById('comp_'+tikrs[i]).innerHTML;
+                    // btn.onclick  =function(){
+                        
+                    //     console.log(this.innerHTML);
+                    // }
+                    // btn.setAttribute('onclick',"printname(event, this)");
+                    
+                    btn.addEventListener('click', function() {
+                        elem = document.getElementById('comp_'+this.innerHTML);
+                        img = document.getElementById("market_pic");
+                        img.src = "/static/sector_analysis/images/FMCG/"+this.innerHTML+".png";
+                    });
+                    //http://127.0.0.1:8000/static/sector_analysis/images/paper__.png - works
+                    //http://127.0.0.1:8000/sector_analysis/static/images/paper__.png
+                    // document.querySelector("#"+'comp_'+tikrs[i]).onclick = function () {console.log("hi")};
+                    // btn.onclick = function (){ console.log(tikrs[i]);}
+                    div.appendChild(btn);
+                }
+                // var anchors = document.getElementsByClassName('comp_');
+                // for(var z = 0; z < anchors.length; z++) {
+                // //     // alert(anchors.innerHTML);
+                //     var elem = anchors[z];
+                //     console.log(elem.innerText);
+                //     elem.addEventListener('click', alert(elem.innerText) );
+                //     // elem.onclick = function() {
+
+                //     // //     elem = document.getElementById('comp_'+elem.innerHTML);
+                //     // //     // img = document.getElementById("market_pic");
+                //     //     console.log(elem.innerText);
+                //         ;
+                //     //     // img.src = "/static/sector_analysis/images/FMCG/"+elem.innerHTML+".png";
+                    
+                // }
+                // elem.addEventListener('click', function() {
+                //     img = document.getElementById("market_pic");
+                //     img.src = "/static/sector_analysis/images/FMCG/"+elem.innerText+".png";
+                // });
+                }
+                
+            // array_length = 
+            // for (let i = 0; i < document.getElementById("comp_nav").getElementsByTagName("button").length; i++) {
+            // elem= document.getElementById("comp_nav").getElementsByTagName("button")[i];
+            // console.log(elem.innerHTML)     }   
+            
+            
+            
+
+            // document.querySelector('#' + 'comp_'+'ITC').onclick = function (){console.log('yes')}                   
+
+            
+        </script>
+
+
+    </head>
+    <body>
+        <div id="container">
+            <div id=create>
+            <button type="button" id="btn_create" onclick="create_buttons() ">Click me!</button>
+            </div>
+        <div id="Top_nav">
+            <p>My Portfolio</p>
+            <p>Scanner</p>
+            <p>Dashboard</p>
+            <p>Notes - Fundamental</p>
+            <p>Notes - Technical</p>
+        </div>
+        <div id="sec_nav">
+            <p>Sector</p>
+            {% for sector in sectors %}
+            <p>{{ sector }}</p>
+            {% endfor %}
+        </div>
+        <div id="comp_nav">
+        </div>
+        <div id="Left_fr">
+            <img id="market_pic" src="{% static 'sector_analysis/images/paper__.png' %} "/>
+            
+        </div>
+        <div id="Right_fr"><p>Calculations</p></div>
+        </div>
+    </body>
+</html>
