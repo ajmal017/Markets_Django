@@ -6,6 +6,7 @@
 <html>
     <head>
         <title>Market analysis</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
         <link rel="stylesheet" href="{% static 'sector_analysis/style.css' %}">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -16,13 +17,7 @@
         <script>
                  // create an empty array
             var dict  = JSON.parse('{{dict}}');
-
-            // object literal with properties
-            // var dict = [];
-            // dict.FMCG = ["BRITANNIA","ITC","HINDUNILVR"]
-            // etc.
-            // var dict = 
-            // var dict = "{{dict}}"; 
+            console.log("{{img_path}}");
             
             DJANGO_STATIC_URL = '{{STATIC_URL}}';
             function remove_comp_buttons(){
@@ -56,94 +51,68 @@
                 var tikrs = dict[sector];
                 remove_comp_buttons();
                 if (Object.keys(dict).indexOf(sector)!=-1){
-                    for (i = 0, len = tikrs.length, text = ""; i < len; i++) {
+                    for (i = 0, len = tikrs.length; i < len; i++) {
                         var div = document.getElementById('comp_nav');
                         var btn = document.createElement("BUTTON");
-                        btn.style.margin = "10px 10px 10px 10px"
-                        btn.innerHTML = tikrs[i];
+                        btn.innerText = tikrs[i];
                         btn.id = 'comp_'+tikrs[i];
-                        btn.className = 'comp_';
-                        // var event = document.getElementById('comp_'+tikrs[i]).innerHTML;
-                        // btn.onclick  =function(){
-                            
-                        //     console.log(this.innerHTML);
-                        // }
-                        // btn.setAttribute('onclick',"printname(event, this)");
-                        
+                        btn.className = "btn btn-primary btn-sm m-1";
                         btn.addEventListener('click', function() {
-                            elem = document.getElementById('comp_'+this.innerHTML);
+                            elem = document.getElementById('comp_'+this.innerText);
                             img = document.getElementById("market_pic");
-                            img.src = "/static/sector_analysis/images/FMCG/"+this.innerHTML+".png";
+                            img.src = "/static/sector_analysis/images/"+sector+"/"+this.innerText+".png";
+                            
                         });
-                        //http://127.0.0.1:8000/static/sector_analysis/images/paper__.png - works
-                        //http://127.0.0.1:8000/sector_analysis/static/images/paper__.png
-                        // document.querySelector("#"+'comp_'+tikrs[i]).onclick = function () {console.log("hi")};
-                        // btn.onclick = function (){ console.log(tikrs[i]);}
+                        
                         div.appendChild(btn);
                     }
                 }
                 }
                 
-                // var anchors = document.getElementsByClassName('comp_');
-                // for(var z = 0; z < anchors.length; z++) {
-                // //     // alert(anchors.innerHTML);
-                //     var elem = anchors[z];
-                //     console.log(elem.innerText);
-                //     elem.addEventListener('click', alert(elem.innerText) );
-                //     // elem.onclick = function() {
-
-                //     // //     elem = document.getElementById('comp_'+elem.innerHTML);
-                //     // //     // img = document.getElementById("market_pic");
-                //     //     console.log(elem.innerText);
-                //         ;
-                //     //     // img.src = "/static/sector_analysis/images/FMCG/"+elem.innerHTML+".png";
-                    
-                // }
-                // elem.addEventListener('click', function() {
-                //     img = document.getElementById("market_pic");
-                //     img.src = "/static/sector_analysis/images/FMCG/"+elem.innerText+".png";
-                // });
-                
-                
-            // array_length = 
-            // for (let i = 0; i < document.getElementById("comp_nav").getElementsByTagName("button").length; i++) {
-            // elem= document.getElementById("comp_nav").getElementsByTagName("button")[i];
-            // console.log(elem.innerHTML)     }   
-            
-            
-            
-
-            // document.querySelector('#' + 'comp_'+'ITC').onclick = function (){console.log('yes')}                   
-
-            
         </script>
     {% endautoescape %}
 
     </head>
     <body>
-        <div id="container">
-            <div id=create>
+        <div id="container" class="border border-primary" style="height: 600px;width: 1300px;position: fixed;">
+            <!-- <div id=create>
             <button type="button" id="btn_create" onclick="create_buttons() ">Click me!</button>
+            </div> -->
+        <div id="Top_nav" class="border border-primary " style="width:95%; height:80px;position: fixed;">
+            <br />
+            <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group mr-2" role="group" aria-label="First group">
+            <button type="button" class="btn btn-secondary m-1">My Portfolio</button>
+            <button type="button" class="btn btn-secondary m-1">Scanner </button>
+            <button type="button" class="btn btn-secondary m-1">Dashboard </button>
+            <button type="button" class="btn btn-secondary m-1">Fundamental Analysis</button>
+            <button type="button" class="btn btn-secondary m-1">Technical Analysis</button>
+            </div></div>
+        </div>
+        
+        <div id="Right_fr" class="border border-primary d-inline-block" style="max-width:100%;
+        max-height:100%;width: 15%;height:70%;position: fixed;;top:15%">
+            <div>
+                {% for sector in sectors %}
+                <button button type="button" class="btn btn-success mr-1 mt-1 ml-1" 
+                onclick="create_buttons('{{sector}}') ">{{ sector }}</button> <br />
+                {% endfor %}
             </div>
-        <div id="Top_nav">
-            <p>My Portfolio</p>
-            <p>Scanner</p>
-            <p>Dashboard</p>
-            <p>Notes - Fundamental</p>
-            <p>Notes - Technical</p>
-        </div>
-        <div id="sec_nav">
-            {% for sector in sectors %}
-            <button type="button" id="btn_create" onclick="create_buttons('{{sector}}') ">{{ sector }}</button>
-            {% endfor %}
-        </div>
-        <div id="comp_nav">
-        </div>
-        <div id="Left_fr">
-            <img id="market_pic" src="{% static 'sector_analysis/images/paper__.png' %} "/>
             
         </div>
-        <div id="Right_fr"><p>Calculations</p></div>
+        <div id="comp_nav" class="border border-primary d-inline-block" style="max-width:100%;
+        max-height:100%;width: 15%;height:70%;position: fixed;left:15%;top:15%">
+                
         </div>
+        <div id="Left_fr" class="border border-primary d-inline-block "  style="max-width:100%;
+        max-height:100%;width: 65%;height:70%;position: fixed;left:30%;top:15%">
+            <img id="market_pic" src="{% static 'sector_analysis/images/paper__.png' %} " style="max-width:100%;
+            max-height:100%;"/>
+            
+        </div>
+        
+        
+       
+    </div>
     </body>
 </html>
