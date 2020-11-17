@@ -17,21 +17,19 @@
         <script>
                  // create an empty array
             var dict  = JSON.parse('{{dict}}');
-            console.log("{{img_path}}");
+            // console.log("{{img_path}}");
             
             DJANGO_STATIC_URL = '{{STATIC_URL}}';
             function remove_comp_buttons(){
                 while(document.getElementById("comp_nav").getElementsByTagName("button").length>0){
-                    console.log(1);
+                    // console.log(1);
                     btn = document.getElementById("comp_nav").getElementsByTagName("button")[0];
                     btn.remove();
 
                 }
             }
 
-            function printname(event) {
-                console.log(this.innerHTML);
-            }     
+            
             
             function convert_to_list(dict) {
                 var arr = [];
@@ -43,11 +41,82 @@
                 }
                 return arr;
             }
+            function round(value, decimals) {
+                return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+                }
 
+                // function checkTextField_is_blank(tb_id) {
+                //      document.getElementById(tb_id).value===""? return True:return False;
+                // }
+
+            function checkval(tb_name){
+                tb = document.getElementById(tb_name);
+                // console.log(tb.value);
+                // console.log(tb.value==='NaN');
+                tb.value==='NaN'?tb.value="":tb.value;
+            }
+            function checkval_text(txt){
+                console.log(txt==='NaN');
+                txt==='NaN'?txt="":txt;
+            }
+            function calc_risk_reward(){
+
+            var sell = parseFloat(document.getElementById('tb_l_sl').value);
+            var profit = parseFloat(document.getElementById('tb_l_risk').value);
+            var buy = parseFloat(document.getElementById('tb_l_cmp').value);
+            qty =  parseFloat(-profit/(sell-buy));
+            document.getElementById('tb_l_calc_qty').value = round(qty,2);
+            document.getElementById('tb_l_calc_inv').value = round(qty*buy,2);
+            // console.log(qty);fcons
+            var final_buy = parseFloat(document.getElementById('tb_long_buy').value);
+            var final_sell = parseFloat(document.getElementById('tb_long_target').value);
+            var final_Qty = parseFloat(document.getElementById('tb_long_qty').value);
+            var final_SL = parseFloat(document.getElementById('tb_long_sl').value);
+            var final_profit = (final_sell-final_buy)*final_Qty;
+
+            var final_r = (final_SL-final_buy)*final_Qty;
+
+            var incr = final_buy-final_SL;
+            var final_r1 = final_buy+incr;
+            var final_r2 = final_buy+(2*incr);
+            var final_r3 = final_buy+(3*incr);
+
+            if (!(document.getElementById('tb_long_sl').value==="")) {
+            document.getElementById('text_minus_r').innerText = final_SL.toString();
+            
+            document.getElementById('text_1r').innerText = final_r1.toString();
+            document.getElementById('text_2r').innerText = final_r2.toString();
+            document.getElementById('text_3r').innerText = final_r3.toString();
+            }
+            
+
+
+            var final_buy_val = final_buy * final_Qty;
+            document.getElementById('tb_long_buy_val').value = final_buy_val;
+            document.getElementById('tb_long_profit').value = final_profit;
+            document.getElementById('tb_long_net_profit').value = 0.85*final_profit;
+            document.getElementById('tb_-r_').value = final_r;
+            document.getElementById('tb_1r_').value = -final_r;
+            document.getElementById('tb_2r_').value = -2*final_r;
+            document.getElementById('tb_3r_').value = -3*final_r;
+            
+            checkval('tb_-r_');
+            checkval('tb_1r_');
+            checkval('tb_2r_');
+            checkval('tb_3r_');
+
+            checkval('tb_l_calc_qty');
+            checkval('tb_l_calc_inv');
+            checkval('tb_long_buy_val');
+            
+            checkval('tb_long_net_profit');
+            
+            checkval('tb_long_profit');
+            }
 
             function create_buttons(sector){
-                console.log(sector);
-                console.log(dict);
+                // console.log(sector);
+                // console.log(dict);
                 var tikrs = dict[sector];
                 remove_comp_buttons();
                 if (Object.keys(dict).indexOf(sector)!=-1){
@@ -61,7 +130,8 @@
                             elem = document.getElementById('comp_'+this.innerText);
                             img = document.getElementById("market_pic");
                             img.src = "/static/sector_analysis/images/"+sector+"/"+this.innerText+".png";
-                            
+                            document.title = this.innerText;
+                            document.getElementById('tb_tikr').value = this.innerText;
                         });
                         
                         div.appendChild(btn);
@@ -74,12 +144,12 @@
 
     </head>
     <body>
-        <div id="container" class="border border-primary" style="height: 600px;width: 1300px;position: fixed;">
+        <div id="container" class="border border-primary" style="height: 700px;width: 1300px;">
             <!-- <div id=create>
             <button type="button" id="btn_create" onclick="create_buttons() ">Click me!</button>
             </div> -->
-        <div id="Top_nav" class="border border-primary " style="width:95%; height:80px;position: fixed;">
-            <br />
+        <div id="Top_nav" class="border border-primary " style="width:95%; height:10%;position: fixed;">
+            
             <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
             <div class="btn-group mr-2" role="group" aria-label="First group">
             <button type="button" class="btn btn-secondary m-1">My Portfolio</button>
@@ -91,7 +161,7 @@
         </div>
         
         <div id="Right_fr" class="border border-primary d-inline-block" style="max-width:100%;
-        max-height:100%;width: 15%;height:70%;position: fixed;;top:15%">
+        max-height:100%;width: 15%;height:70%;position: fixed;;top:10%">
             <div>
                 {% for sector in sectors %}
                 <button button type="button" class="btn btn-success mr-1 mt-1 ml-1" 
@@ -101,18 +171,67 @@
             
         </div>
         <div id="comp_nav" class="border border-primary d-inline-block" style="max-width:100%;
-        max-height:100%;width: 15%;height:70%;position: fixed;left:15%;top:15%">
+        max-height:100%;width: 15%;height:70%;position: fixed;left:15%;top:10%">
                 
         </div>
-        <div id="Left_fr" class="border border-primary d-inline-block "  style="max-width:100%;
-        max-height:100%;width: 65%;height:70%;position: fixed;left:30%;top:15%">
-            <img id="market_pic" src="{% static 'sector_analysis/images/paper__.png' %} " style="max-width:100%;
-            max-height:100%;"/>
+        <div id="Left_fr" class="border border-primary d-inline-block "  style="width: 65%;height:70%;position: fixed;left:30%;top:10%">
+            <img id="market_pic"  />
             
         </div>
         
+        <div class="border border-primary d-inline-block mt-2" style="max-width:100%;
+        max-height:100%;position: fixed;top:80%;width:63%;height:15%" onchange="calc_risk_reward()">
+            
+            <div class="text d-inline-block" id="btnGroupAddon">Risk</div>
+             <input type="text" aria-describedby="btnGroupAddon" class="form-control m-1 d-inline-block bg-danger text-white" id="tb_l_risk" style="width:70px" placeholder="Risk" value="200" onchange="calc_risk_reward()">             
+             <div class="text d-inline-block" id="btnGroupAddon">CMP</div>
+             <input type="text" class="form-control m-1 d-inline-block" id="tb_l_cmp" style="width:70px" 
+              value="1000">         
+             <div class="text d-inline-block" id="btnGroupAddon">SL</div>
+             <input type="text" class="form-control m-1 d-inline-block" id="tb_l_sl" style="width:70px" 
+             value="990" >
+             
+             <div class="text d-inline-block" id="btnGroupAddon" >Calc Qty.</div>
+             <input type="text" class="form-control m-1 d-inline-block" id="tb_l_calc_qty" style="width:70px" >
+             <div class="text d-inline-block" id="btnGroupAddon" >Invested</div>
+             <input type="text" class="form-control m-1 d-inline-block" id="tb_l_calc_inv" style="width:100px" >
+             
+            <br />
+            <input type="text" class="form-control m-1 d-inline-block" disabled id="tb_tikr" style="width:150px;text-align: center;font-size-adjust: 0.58;" placeholder="TIKR">
+            <input type="text" class="form-control m-1 d-inline-block" id="tb_long_buy" style="width:70px;text-align: center;" placeholder="Buy">
+            <input type="text" class="form-control m-1 d-inline-block" id="tb_long_qty" style="width:70px;text-align: center;" placeholder="Qty">
+            
+            <input type="text" class="form-control m-1 d-inline-block" id="tb_long_sl" style="width:70px;text-align: center;" placeholder="SL">
+            <input type="text" class="form-control m-1 d-inline-block" id="tb_long_target" style="width:70px;text-align: center;" placeholder="T">
+            
+            <input type="text" class="form-control m-1 d-inline-block" id="tb_long_buy_val" style="width:100px;text-align: center;" disabled placeholder="Buy Val.">
+            <input type="text" class="form-control m-1 d-inline-block bg-success text-white" id="tb_long_profit" style="color:white;width:100px;text-align: center;" disabled placeholder="Profit">
+            <input type="text" class="text m-1 d-inline-block text-success" id="tb_long_net_profit" style="width:100px;text-align: center;" disabled placeholder="Net P/L">
+
+
         
-       
+        
     </div>
+    <div class="border border-primary d-inline-block mt-2" style="max-width:100%;
+        max-height:100%;position: fixed;top:80%;width:25%;height:15%;left:63%" onchange="calc_risk_reward()">
+        <div class="border border-primary d-inline-block "  style="max-height:100%;height:100%">
+            <div class="text d-inline-block m-1 mt-3 text-danger" id="text_minus_r" style="width:70px;text-align: center;">-R</div>
+            <div class="text d-inline-block m-1 text-success" id="text_1r" style="width:70px;text-align: center;">+R</div>
+            <div class="text d-inline-block m-1 text-success" id="text_2r" style="width:70px;text-align: center;">+2R</div>
+            <div class="text d-inline-block m-1 text-success" id="text_3r" style="width:70px;text-align: center;">+3R</div>
+            <input type="text" class="form-control m-1 d-inline-block bg-danger text-white" id="tb_-r_" style="width:70px;text-align: center;"> 
+            <input type="text" class="form-control m-1 d-inline-block text-success" id="tb_1r_" style="width:70px;text-align: center;"> 
+            <input type="text" class="form-control m-1 d-inline-block  bg-success text-white" id="tb_2r_" style="width:70px;text-align: center;"> 
+            <input type="text" class="form-control m-1 d-inline-block  bg-success text-white" id="tb_3r_" style="width:70px;text-align: center;"> 
+        </div>
+    </div>
+    
+    
+        <!-- <div class="border     border-primary d-inline-block mt-1" style="max-width:100%;
+        max-height:100%;position: fixed;top:80%;width:50%;height:15%;right:5%">
+        </div> -->
+    </div>
+    
+
     </body>
 </html>
