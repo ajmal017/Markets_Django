@@ -9,6 +9,3 @@ class Holdings(models.Model):
 
     def __str__(self):
         return f"{self.tikr} | {self.buy} | {self.qty}"
-
-    class Meta:
-        verbose_name_plural = "Holdings"
