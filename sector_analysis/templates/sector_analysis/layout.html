@@ -17,7 +17,8 @@
         <script>
                  // create an empty array
             var dict  = JSON.parse('{{dict}}');
-            // console.log("{{img_path}}");
+            // console.log(dict);
+            // console.log('{{sectors}}')
             DJANGO_STATIC_URL = '{{STATIC_URL}}';
             function remove_comp_buttons(){
                 while(document.getElementById("comp_nav").getElementsByTagName("button").length>0){
