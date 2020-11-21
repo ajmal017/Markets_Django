@@ -1,0 +1,58 @@
+{% extends "sector_analysis/layout.html" %}
+{% block body %}
+
+<form class= "d-inline" action="" method="POST">
+    <div id="Top_nav" class="border border-primary m-1 ">            
+        <h1 class="d-inline">My Portfolio</h1>
+            
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-success m-1 " style="word-wrap: break-word;height:50px;width:130px;text-overflow: clip;">Update LTP</button>
+            <input type="text" class="form-control d-inline-block" name="Capital" id="tb_cap" style="width:150px;text-align: center;" placeholder="Capital">
+           <p>{{datetime}}</p>
+        
+        
+
+    </div>
+    
+    
+<!-- <table style="border: 1px solid black;"> -->
+<table>
+    <thead>
+        <tr>
+            <th>Company</th>
+            <th>Buy</th>
+            <th>Qty</th>            
+            <th>Buy Value</th>
+            <th>SL</th>
+            <th>Target</th>
+            <th>-R</th>
+            <th>+R</th>           
+            <th>+2R</th>            
+            <th>+3R</th>
+            <th>LTP</th>
+            <th>P/L</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% if d %}   
+    {% for i in d %} 
+      <tr> 
+        <td>{{i.tikr}}</td> 
+        <td>{{i.buy}}</td> 
+        <td>{{i.qty}}</td> 
+        <td>{{i.buy_value}}</td>        
+        <td>{{i.sl}}</td> 
+        <td>{{i.t}}</td> 
+        <td>{{i.Risk_p}}</td>        
+        <td>{{i.R1_p}}</td>        
+        <td>{{i.R2_p}}</td>        
+        <td>{{i.R3_p}}</td>
+        <td>{{i.ltp}}</td>
+        <td>{{i.pl}}</td>
+      </tr> 
+    {% endfor %} 
+    {% endif %}
+    </tbody> 
+</table>
+</form>
+{% endblock %}
