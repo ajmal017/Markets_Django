@@ -1,10 +1,10 @@
 from django.shortcuts import render
-
 from django.http import HttpResponse
 import json
 import pandas as pd
 from bokeh.plotting import figure, output_file, show 
 from bokeh.embed import components
+from sector_analysis.models import Holdings
 
 mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
 mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
@@ -32,7 +32,21 @@ for text in sectors_filenames:
     dict[sector] = companies
 
 def index(request):
-    
+    if request.method=="POST":
+        tikr = request.POST['tkr']
+        buy = float(request.POST['B'])
+        qty = int(request.POST['Q'])
+        sl = float(request.POST['SL'])
+        target = float(request.POST['T'])
+        Holdings.objects.create(
+            tikr = tikr,
+            buy = buy,
+            qty = qty,
+            sl = sl,
+            t=target
+        )
+        return HttpResponse(str(tikr)+"|"+str(buy)+"|"+str(qty)+"|"+str(sl)+"|"+str(target))
+
     return render(request,"sector_analysis/index.html",
     {"sectors": sectors,
     "dict":json.dumps(dict) ,

@@ -6,3 +6,7 @@ class Holdings(models.Model):
     buy = models.FloatField()
     sl = models.FloatField()
     qty = models.IntegerField()
+    t = models.FloatField()
+    # dt = models.DateTimeField()
+    def __str__(self):
+        return f"{self.tikr}|{self.buy}|{self.qty}|{self.sl}|{self.t}"

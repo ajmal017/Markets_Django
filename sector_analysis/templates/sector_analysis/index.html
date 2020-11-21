@@ -2,6 +2,11 @@
        {% extends "sector_analysis/layout.html" %}
        {% block body %}
         
+        <form action="" method="POST">
+
+
+            {% csrf_token %}    
+
         <div class="border border-primary row m-1"  onchange="calc_risk_reward()" style="position:relative;">
             <div class="border border-primary d-inline-block m-1 " onchange="calc_risk_reward()" style="width:63%;">
                 <div class="row ml-1 ">
@@ -19,18 +24,20 @@
                     <div class="text d-inline-block ml-2 mt-2"  >Invested</div>
                     <input type="text" class="form-control m-1 d-inline-block" id="tb_l_calc_inv" style="width:100px" >
                 </div>
+                
                 <div class="row ml-1">
-                    <input type="text" class="form-control m-1 d-inline-block" disabled id="tb_tikr" style="width:150px;text-align: center;font-size-adjust: 0.58;" placeholder="TIKR">
-                    <input type="text" class="form-control m-1 d-inline-block" id="tb_long_buy" style="width:70px;text-align: center;" placeholder="Buy">
-                    <input type="text" class="form-control m-1 d-inline-block" id="tb_long_qty" style="width:70px;text-align: center;" placeholder="Qty">
+                    <input type="text" class="form-control m-1 d-inline-block" name="tkr" id="tb_tikr" style="width:150px;text-align: center;font-size-adjust: 0.58;" placeholder="TIKR">
+                    <input type="text" class="form-control m-1 d-inline-block" name="B" id="tb_long_buy" style="width:70px;text-align: center;" placeholder="Buy">
+                    <input type="text" class="form-control m-1 d-inline-block" name="Q" id="tb_long_qty" style="width:70px;text-align: center;" placeholder="Qty">
                     
-                    <input type="text" class="form-control m-1 d-inline-block" id="tb_long_sl" style="width:70px;text-align: center;" placeholder="SL">
-                    <input type="text" class="form-control m-1 d-inline-block" id="tb_long_target" style="width:70px;text-align: center;" placeholder="T">
+                    <input type="text" class="form-control m-1 d-inline-block" name="SL" id="tb_long_sl" style="width:70px;text-align: center;" placeholder="SL">
+                    <input type="text" class="form-control m-1 d-inline-block" name="T" id="tb_long_target" style="width:70px;text-align: center;" placeholder="T">
                     
                     <input type="text" class="form-control m-1 d-inline-block" id="tb_long_buy_val" style="width:100px;text-align: center;" disabled placeholder="Buy Val.">
                     <input type="text" class="form-control m-1 d-inline-block bg-success text-white" id="tb_long_profit" style="color:white;width:100px;text-align: center;" disabled placeholder="Profit">
                     <input type="text" class="text m-1 d-inline-block text-success" id="tb_long_net_profit" style="width:100px;text-align: center;" disabled placeholder="Net P/L">
                 </div>
+                
             </div>
             <div class="border border-primary d-inline-block m-1" onchange="calc_risk_reward()" style="width:24%;">
                
@@ -49,10 +56,11 @@
             
              </div>
              <div class="border border-primary d-inline-block m-1 " onchange="calc_risk_reward()" style="width:140px;height:100%;min-height: 100%;">
-                <button type="button" class="btn btn-outline-success m-1 " style="word-wrap: break-word;height:100px;width:130px;text-overflow: clip;">Add to Portfolio</button>
+                <button type="submit" class="btn btn-outline-success m-1 " style="word-wrap: break-word;height:100px;width:130px;text-overflow: clip;">Add to Portfolio</button>
             </div>
             
         </div>
+        </form>
         <div id="Right_fr" class="row" style="height:500px">
             
                         <div class="border border-primary d-inline-block ml-3" style="width:15%;left:5%;text-align: center;">
