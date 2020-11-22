@@ -8,158 +8,25 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        {% autoescape off %}
-        <script type="text/javascript">
-           
-        </script>
-        <script>
-
-           
-
-                 // create an empty array
-            var dict  = JSON.parse('{{dict}}');
-            // console.log(dict);
-            // console.log('{{sectors}}')
-            DJANGO_STATIC_URL = '{{STATIC_URL}}';
-            function remove_comp_buttons(){
-                while(document.getElementById("comp_nav").getElementsByTagName("button").length>0){
-                    // console.log(1);
-                    btn = document.getElementById("comp_nav").getElementsByTagName("button")[0];
-                    btn.remove();
-
-                }
-            }
-
-            // d
-            
-            function convert_to_list(dict) {
-                var arr = [];
-
-                for (var key in dict) {
-                    if (dict.hasOwnProperty(key)) {
-                        arr.push( [ key ] );
-                    }
-                }
-                return arr;
-            }
-            function round(value, decimals) {
-                return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
-                }
-
-                // function checkTextField_is_blank(tb_id) {
-                //      document.getElementById(tb_id).value===""? return True:return False;
-                // }
-
-            function checkval(tb_name){
-                tb = document.getElementById(tb_name);
-                // console.log(tb.value);
-                // console.log(tb.value==='NaN');
-                tb.value==='NaN'?tb.value="":tb.value;
-            }
-            function checkval_text(txt){
-                console.log(txt==='NaN');
-                txt==='NaN'?txt="":txt;
-            }
-            function calc_risk_reward(){
-
-            var sell = parseFloat(document.getElementById('tb_l_sl').value);
-            var profit = parseFloat(document.getElementById('tb_l_risk').value);
-            var buy = parseFloat(document.getElementById('tb_l_cmp').value);
-            qty =  parseFloat(-profit/(sell-buy));
-            document.getElementById('tb_l_calc_qty').value = round(qty,2);
-            document.getElementById('tb_l_calc_inv').value = round(qty*buy,2);
-            // console.log(qty);fcons
-            var final_buy = parseFloat(document.getElementById('tb_long_buy').value);
-            var final_sell = parseFloat(document.getElementById('tb_long_target').value);
-            var final_Qty = parseFloat(document.getElementById('tb_long_qty').value);
-            var final_SL = parseFloat(document.getElementById('tb_long_sl').value);
-            var final_profit = (final_sell-final_buy)*final_Qty;
-
-            var final_r = (final_SL-final_buy)*final_Qty;
-
-            var incr = final_buy-final_SL;
-            var final_r1 = final_buy+incr;
-            var final_r2 = final_buy+(2*incr);
-            var final_r3 = final_buy+(3*incr);
-
-            if (!(document.getElementById('tb_long_sl').value==="")) {
-            document.getElementById('text_minus_r').innerText = final_SL.toString();
-            
-            document.getElementById('text_1r').innerText = final_r1.toString();
-            document.getElementById('text_2r').innerText = final_r2.toString();
-            document.getElementById('text_3r').innerText = final_r3.toString();
-            }
-            
-
-
-            var final_buy_val = final_buy * final_Qty;
-            document.getElementById('tb_long_buy_val').value = final_buy_val;
-            document.getElementById('tb_long_profit').value = final_profit;
-            document.getElementById('tb_long_net_profit').value = 0.85*final_profit;
-            document.getElementById('tb_-r_').value = final_r;
-            document.getElementById('tb_1r_').value = -final_r;
-            document.getElementById('tb_2r_').value = -2*final_r;
-            document.getElementById('tb_3r_').value = -3*final_r;
-            
-            checkval('tb_-r_');
-            checkval('tb_1r_');
-            checkval('tb_2r_');
-            checkval('tb_3r_');
-
-            checkval('tb_l_calc_qty');
-            checkval('tb_l_calc_inv');
-            checkval('tb_long_buy_val');
-            
-            checkval('tb_long_net_profit');
-            
-            checkval('tb_long_profit');
-            }
-
-            function create_buttons(sector){
-                // console.log(sector);
-                // console.log(dict);
-                var tikrs = dict[sector];
-                remove_comp_buttons();
-                if (Object.keys(dict).indexOf(sector)!=-1){
-                    for (i = 0, len = tikrs.length; i < len; i++) {
-                        var div = document.getElementById('comp_nav');
-                        var btn = document.createElement("BUTTON");
-                        btn.innerText = tikrs[i];
-                        btn.id = 'comp_'+tikrs[i];
-                        btn.className = "btn btn-primary btn-sm m-1";
-                        btn.addEventListener('click', function() {
-                            elem = document.getElementById('comp_'+this.innerText);
-                            img = document.getElementById("market_pic");
-                            img.src = "/static/sector_analysis/images/"+sector+"/"+this.innerText+".png";
-                            document.title = this.innerText;
-                            document.getElementById('tb_tikr').value = this.innerText;
-                        });
-                        
-                        div.appendChild(btn);
-                    }
-                }
-                }
-                
-        </script>
-    {% endautoescape %}
+        
 
     </head>
     <body>
-    <div id="container" class="border border-primary" style="width: 1300px;">
+    
             
             <!-- <div id=create>
             <button type="button" id="btn_create" onclick="create_buttons() ">Click me!</button>
             </div> -->
-        <div id="Top_nav" class="border border-primary m-1 ">            
-            <a href="{% url 'sector_analysis:index' %}">Scanner</a>
-            <a href="{% url 'sector_analysis:portfolio' %}">Portfolio</a>            
-            <a href="{% url 'sector_analysis:charts' %}">Charts</a>
-            <button type="button" class="btn btn-secondary m-1">Dashboard </button>
-            <button type="button" class="btn btn-secondary m-1">Fundamental Analysis</button>
-            <button type="button" class="btn btn-secondary m-1">Technical Analysis</button>
-            
-        </div>
-
+            <nav class="navbar navbar-dark bg-dark" style="width:1300px">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'sector_analysis:index' %}">Scanner</a>
+                <a class="navbar-brand" href="{% url 'sector_analysis:portfolio' %}">Portfolio</a>            
+                <a class="navbar-brand" href="{% url 'sector_analysis:charts' %}">Charts</a>
+                <a class="navbar-brand" href="#">Summary </a>
+                <a class="navbar-brand"  href="#">Closed Trades</a>
+                <a class="navbar-brand" href="#">Technical Analysis-Live charts</a>
+            </div>
+            </nav>
         {% block body %}
 
         {% endblock %}

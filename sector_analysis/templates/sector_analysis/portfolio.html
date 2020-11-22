@@ -1,14 +1,16 @@
 {% extends "sector_analysis/layout.html" %}
 {% block body %}
-
+<script>
+    console.log('test')
+</script>
 <form class= "d-inline" action="" method="POST">
     <div id="Top_nav" class="border border-primary m-1 ">            
         <h1 class="d-inline">My Portfolio</h1>
             
             {% csrf_token %}
-            <button type="submit" class="btn btn-outline-success m-1 " style="word-wrap: break-word;height:50px;width:130px;text-overflow: clip;">Update LTP</button>
+            <button type="submit" class="btn btn-outline-success m-1 " name="update_ltp" style="word-wrap: break-word;height:50px;width:130px;text-overflow: clip;">Update LTP</button>
             <input type="text" class="form-control d-inline-block" name="Capital" id="tb_cap" style="width:150px;text-align: center;" placeholder="Capital">
-           <p>{{datetime}}</p>
+           <p>{{time_happen}}</p>
         
         
 
@@ -20,6 +22,7 @@
     <thead>
         <tr>
             <th>Company</th>
+            <th>Entry</th>
             <th>Buy</th>
             <th>Qty</th>            
             <th>Buy Value</th>
@@ -31,6 +34,7 @@
             <th>+3R</th>
             <th>LTP</th>
             <th>P/L</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -38,6 +42,7 @@
     {% for i in d %} 
       <tr> 
         <td>{{i.tikr}}</td> 
+        <td>{{i.entry}}</td>
         <td>{{i.buy}}</td> 
         <td>{{i.qty}}</td> 
         <td>{{i.buy_value}}</td>        
@@ -49,6 +54,7 @@
         <td>{{i.R3_p}}</td>
         <td>{{i.ltp}}</td>
         <td>{{i.pl}}</td>
+        <td><button type="submit" value="{{i.button_id}}" name="{{i.button_id}}" class="btn btn-outline-danger p-1" style="height:15px;font-size: 15px;" ></button></td>
       </tr> 
     {% endfor %} 
     {% endif %}
