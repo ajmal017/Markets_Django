@@ -1,0 +1,26 @@
+{% extends "sector_analysis/layout.html" %}
+{% block body %}
+
+<div style="width:1300px;height:1000px;border:solid rgba(5, 156, 226, 0.919)">
+    <div style="height:5%">
+        <input type="text" class="m-1">
+        
+    </div>
+
+
+    <div style="height:50%">
+        <div style="height:100%;width:33.3%;float:left; border: 1px solid black;;">
+            {% autoescape off %}
+            {{ plot_div }}
+            {% endautoescape %}
+        </div>
+        <div style="height:100%;width:33.3%;float:left;border: 1px solid black;;">
+            <h2> Second Div</h2>
+        </div>
+        <div style="height:100%;width:33.3%;float:left;border: 1px solid black;;">
+            <h2> Third Div</h2>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

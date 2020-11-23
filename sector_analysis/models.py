@@ -14,7 +14,7 @@ class Holdings(models.Model):
     buy = models.FloatField()
     sl = models.FloatField()
     qty = models.IntegerField()
-    t = models.FloatField()
+    t = models.FloatField() 
     entrydate = models.DateTimeField(default=datetime.now, blank=True)
     # dt = models.DateTimeField()
 
