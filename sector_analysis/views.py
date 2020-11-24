@@ -98,7 +98,7 @@ def get_or_create_ltp():
     for t in tikr_list:
         try:
             obj = ltp_tikrs.objects.get(tikr=t)
-            print(t, "is available")
+            print(t, " is available")
             dict[t] = obj.ltp
             pass
         except:
@@ -213,7 +213,18 @@ def portfolio(request):
     return render(request,"sector_analysis/portfolio.html",
     context)
 
-
+def dict_sect_comps():
+    s=r'C:\Users\prave\Documents\GitHub\Market-Analysis'
+    files = os.listdir(s)
+    files = [x for x in files if '.csv' in x]
+    files = [x for x in files if '15m_' in x]
+    files = [x.split('mdf_15m_')[1].split('.csv')[0] for x in files]
+    dict = {}
+    for sect in files:
+        mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m_"+sect+".csv")
+        mdf = mdf[['industry','tikr']].copy().drop_duplicates()
+        dict[sect] = list(mdf.tikr)
+    return dict
 
     
 def index(request):
@@ -232,7 +243,8 @@ def index(request):
             entrydate=datetime.now()    ,
         )
         return HttpResponse(str(tikr)+"|"+str(buy)+"|"+str(qty)+"|"+str(sl)+"|"+str(target))
-
+    dict = dict_sect_comps()
+    sectors = list(dict.keys())
     return render(request,"sector_analysis/index.html",
     {
     "sectors": sectors,
@@ -246,25 +258,203 @@ def index(request):
 from django.shortcuts import render
 from plotly.offline import plot
 from plotly.graph_objs import Scatter
+import plotly.express as px
+
+# def charts(request):
+#     x_data = [0,1,2,3]
+#     y_data = [x**2 for x in x_data]
+#     plot_div = plot([Scatter(x=x_data, y=y_data,
+#                         mode='lines', name='test',
+#                         opacity=0.8, marker_color='green') ],
+#                output_type='div')
+               
+#     return render(request,'sector_analysis/charts.html',
+#             {'plot_div': plot_div} )
+
+from django.shortcuts import render
+
+
+def gen_bokeh_chart_for_interval(interval_,tikr):
+    from bokeh.plotting import figure, output_file, show 
+    from bokeh.embed import components
+    from bokeh.models.tools import HoverTool, WheelZoomTool, PanTool, CrosshairTool
+    df = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\f_mdf_"+interval_ +".csv")
+    df = df[df.tikr==tikr].copy()
+    x=df.index
+    y=df.Close
+    title=tikr + " " + interval_
+    plot = figure(title= title , 
+        x_axis_label= 'Candle #', 
+        y_axis_label= 'Close', 
+        plot_width =400,
+        plot_height =400)
+    plot.line(x, y, line_width = 2)
+    plot.toolbar.active_scroll = plot.select_one(WheelZoomTool)
+    script, div = components(plot)
+    return script,div
+
+# def gen_bokeh_chart_for_interval(interval_,sect,tikr):
+#     from bokeh.plotting import figure, output_file, show 
+#     from bokeh.embed import components
+#     from bokeh.models.tools import HoverTool, WheelZoomTool, PanTool, CrosshairTool
+#     df = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_"+interval_ +"_"+sect+".csv")
+#     df = df[df['tikr']==tikr]
+#     x=df.index
+#     y=df.Close
+#     title=tikr + " " + interval_
+#     plot = figure(title= title , 
+#         x_axis_label= 'Candle #', 
+#         y_axis_label= 'Close', 
+#         plot_width =400,
+#         plot_height =400)
+#     plot.line(x, y, line_width = 2)
+#     plot.toolbar.active_scroll = plot.select_one(WheelZoomTool)
+#     script, div = components(plot)
+#     return script,div
+
+def gen_all_scripts_divs(tikr):
+    interval_ = '1wk'
+    script_1w,div_1w = gen_bokeh_chart_for_interval(interval_,tikr) 
+    interval_ = '1d'
+    script_1d,div_1d = gen_bokeh_chart_for_interval(interval_,tikr) 
+    interval_ = '15m'
+    script_15,div_15 = gen_bokeh_chart_for_interval(interval_,tikr)
+    return script_1w,div_1w,script_1d,div_1d,script_15,div_15
+
+# def gen_all_scripts_divs(sect,tikr):
+#     interval_ = '1wk'
+#     script_1w,div_1w = gen_bokeh_chart_for_interval(interval_,sect,tikr) 
+#     interval_ = '1d'
+#     script_1d,div_1d = gen_bokeh_chart_for_interval(interval_,sect,tikr) 
+#     interval_ = '15m'
+#     script_15,div_15 = gen_bokeh_chart_for_interval(interval_,sect,tikr)
+#     return script_1w,div_1w,script_1d,div_1d,script_15,div_15
+import json
+def get_sect_comps():
+    mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\f_mdf_15m.csv")
+    mdf = mdf.copy()[['tikr','industry']].drop_duplicates()
+    mdf = mdf.set_index('industry')
+    dict = {}
+    for ind in mdf.index:
+        dict[ind] = []
+    mdf = mdf.reset_index()
+    for i in mdf.index:
+        dict[mdf.loc[i,'industry']].append(mdf.loc[i,'tikr'])
+    return dict
+
+def find_sect_for_tikr(tikr):
+    mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\f_mdf_15m.csv")
+    industry= list(mdf[mdf['tikr']==tikr].industry)
+    return industry[0]
+
+def gen_btn_ids_comps(tikr):
+    # tikr = "MARICO"
+    sect = find_sect_for_tikr(tikr)
+    sect_comps = get_sect_comps()
+    companies = sect_comps[sect]
+    btn_ids_comps = ['comp_'+x+'_sector_'+sect for x in companies]
+    return btn_ids_comps
+
 def charts(request):
-    x_data = [0,1,2,3]
-    y_data = [x**2 for x in x_data]
-    plot_div = plot([Scatter(x=x_data, y=y_data,
-                        mode='lines', name='test',
-                        opacity=0.8, marker_color='green')],
-               output_type='div')
+    if request.method=="POST":
+        import numpy as np
+        req_post_keys = (list(request.POST.keys()))
+        comp = [x for x in req_post_keys if 'comp_' in x]
+        if  len(comp)>0:
+            # btn = [x for x in s if 'comp_' in req_post_keys][0].split('comp_')[1]
+            s = comp[0]
+            company = s[:s.find('_sector')].strip('comp_')
+            sector = s[s.find('_sector'):].strip('_sector_')            
+            print(company)
+            print(sector)
+            tikr = company
+            sect = find_sect_for_tikr(tikr)
+            script_1w,div_1w,script_1d,div_1d,script_15,div_15 = gen_all_scripts_divs(tikr)   
+            sect_comps = get_sect_comps()
+            sectors = list(sect_comps.keys())
+            dict = json.dumps(sect_comps)
+            btn_id_comps = gen_btn_ids_comps(tikr)
+            companies =  sect_comps[sect]
+            
+            #Feed them to the Django template.
+            return render(request, 'sector_analysis/charts.html',
+                    {'script_15' : script_15 , 'div_15' : div_15 ,
+                    'script_1d' : script_1d , 'div_1d' : div_1d ,
+                    'script_1w' : script_1w , 'div_1w' : div_1w ,
+                    'sectors': sectors,
+                    'dict' : dict,
+                    'sect' : sect,
+                    'btn_sets':zip(btn_id_comps,companies),
+                    } ) 
+        else:
+            print(req_post_keys)
+    tikr = "MARICO"
+    sect = find_sect_for_tikr(tikr)
+    script_1w,div_1w,script_1d,div_1d,script_15,div_15 = gen_all_scripts_divs(tikr)   
+    sect_comps = get_sect_comps()
+    sectors = list(sect_comps.keys())
+    dict = json.dumps(sect_comps)
+    btn_id_comps = gen_btn_ids_comps(tikr)
+    companies =  sect_comps[sect]
+    
+    #Feed them to the Django template.
+    return render(request, 'sector_analysis/charts.html',
+            {'script_15' : script_15 , 'div_15' : div_15 ,
+            'script_1d' : script_1d , 'div_1d' : div_1d ,
+            'script_1w' : script_1w , 'div_1w' : div_1w ,
+            'sectors': sectors,
+            'dict' : dict,
+            'sect' : sect,
+            'btn_sets':zip(btn_id_comps,companies),
+            } ) 
 
-    return render(request,'sector_analysis/charts.html',
-            {'plot_div': plot_div} )
 
 
-s=r'C:\Users\prave\Documents\GitHub\Market-Analysis'
-files = os.listdir(s)
-files = [x for x in files if '.csv' in x]
-files = [x for x in files if '15m_' in x]
-files = [x.split('mdf_15m_')[1].split('.csv')[0] for x in files]
-dict = {}
-for sect in files:
-    mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m_"+sect+".csv")
-    mdf = mdf[['industry','tikr']].copy().drop_duplicates()
-    dict[sect] = list(mdf.tikr)
+
+#  COMBINE ALL SECTORS TO ONE MDF 
+#2  FOR EACH INTERVAL 
+#1  FOR EACH SECTOR
+#  MDFS TO ONE CSV
+#1  END FOR SECTOR
+#2  END FOR INTERVAL
+# def gen_final_csv(interval_):
+#     f_mdf = pd.DataFrame()
+#     for sect in dict.keys():
+#         mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_"+interval_+sect+".csv")
+#         if f_mdf.empty:
+#             f_mdf = mdf
+#         else:
+#             f_mdf = pd.concat([f_mdf,mdf]).reset_index(drop=True)
+#     f_mdf.to_csv('f_mdf_'+interval_+'.csv', index=False)
+     
+# def get_sect_comps():
+#     mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\f_mdf_15m.csv")
+#     mdf = mdf.copy()[['tikr','industry']].drop_duplicates()
+#     mdf = mdf.set_index('industry')
+#     dict = {}
+#     for ind in mdf.index:
+#         dict[ind] = []
+#     mdf = mdf.reset_index()
+#     for i in mdf.index:
+#         dict[mdf.loc[i,'industry']].append(mdf.loc[i,'tikr'])
+#     return dict
+
+
+# tikr='MOTHERSUMI'
+# mdf[mdf.tikr==tikr]
+# tikr_df = mdf[mdf.tikr==tikr]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,24 +1,116 @@
 {% extends "sector_analysis/layout.html" %}
 {% block body %}
+{% autoescape off %}
 
+<script>
+    
+    var dict  = JSON.parse('{{dict}}');
+    console.log(dict);
+
+    var sel_sector = '{{sect}}'
+
+
+    function get_data(){
+        return false;
+    }
+
+    function remove_comp_buttons(){
+                while(document.getElementById("comp_nav").getElementsByTagName("button").length>0){
+                    // console.log(1);
+                    btn = document.getElementById("comp_nav").getElementsByTagName("button")[0];
+                    btn.remove();
+
+                }
+            }
+
+    function create_button_company(sector,tikrs){
+        if (Object.keys(dict).indexOf(sector)!=-1){
+                    col_change(sector);
+                    for (i = 0, len = tikrs.length; i < len; i++) {
+                        var div = document.getElementById('comp_nav');
+                        var btn = document.createElement("BUTTON");
+                        btn.type = "submit"
+                        btn.innerText = tikrs[i];
+                        btn.id = 'comp_'+tikrs[i];
+                        btn.className = "btn btn-primary btn-sm m-1";
+                        btn.name = 'comp_'+tikrs[i]+'_sector_'+sector;
+                        // btn.onclick = function () { return false; };
+                        // console.log(div,'---');
+                        div.appendChild(btn);
+                    }
+                }
+    }
+    // <button button type="submit" class="btn btn-primary btn-sm m-1" 
+    //         onclick="create_buttons('{{sector}}') " >{{ sector }}</button> 
+    function create_buttons(sector,sect){
+                // console.log(sector);
+                // console.log(dict);
+                var tikrs = dict[sector];
+                remove_comp_buttons();
+                create_button_company(sector,tikrs);
+                }
+    // remove_comp_buttons();
+    // var tikrs = dict[sel_sector];   
+    // create_button_company(sel_sector,tikrs);
+    // create_buttons(sector)
+    function col_change(sector){
+        console.log(sector)
+        btns = document.getElementById('sect_nav').getElementsByTagName('button');
+        for(i=0;i<btns.length;i++){
+            // sect = 'FMCG'
+            if (btns[i].innerText===sector) {
+                btns[i].className='btn btn-dark btn-sm m-1'
+            } else {
+                btns[i].className='btn btn-light btn-sm m-1'
+            }
+        }
+
+
+    }
+    col_change('{{sect}}')
+</script>
+{% endautoescape %}
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-1.3.4.min.js"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-1.3.4.min.js"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-1.3.4.min.js"
+        crossorigin="anonymous"></script>
+{{ script_15 | safe }}
+{{ script_1d | safe }}
+{{ script_1w | safe }}
 <div style="width:1300px;height:1000px;border:solid rgba(5, 156, 226, 0.919)">
-    <div style="height:5%">
-        <input type="text" class="m-1">
+    <div style="height:15%" >
+        <div id="sect_nav">
+            {% for sector in sectors %}
+            <button button type="button" class="btn btn-light btn-sm m-1" 
+            onclick="create_buttons('{{sector}}','{{sect}}') " >{{ sector }}</button>
+            {% endfor %}
+        </div>
+        <form class= "d-inline" action="" method="POST">
+            {% csrf_token %} 
+
+            
+        <div id="comp_nav">
+            {% for btn_id,company in btn_sets %}
+            <button type="submit"  name='{{btn_id}}' id='{{btn_id}}' class="btn btn-primary btn-sm m-1" >{{company}}</button> 
+            {% endfor %}
+        </div>
+            
+        </form>
         
     </div>
 
 
     <div style="height:50%">
         <div style="height:100%;width:33.3%;float:left; border: 1px solid black;;">
-            {% autoescape off %}
-            {{ plot_div }}
-            {% endautoescape %}
+            {{ div_1w | safe }}
         </div>
         <div style="height:100%;width:33.3%;float:left;border: 1px solid black;;">
-            <h2> Second Div</h2>
+            {{ div_1d | safe }}
         </div>
         <div style="height:100%;width:33.3%;float:left;border: 1px solid black;;">
-            <h2> Third Div</h2>
+            {{ div_15 | safe }}
         </div>
     </div>
 </div>
