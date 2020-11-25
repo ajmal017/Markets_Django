@@ -31,6 +31,7 @@
             <th></th>
             <th>Company</th>
             <th>Entry</th>
+            <th>Exit</th>
             <th>Buy</th>
             <th>Qty</th>            
             <th>Buy Value</th>
@@ -39,10 +40,9 @@
             <th>+R</th>           
             <th>+2R</th>            
             <th>+3R</th>
-            <th>LTP</th>
+            <th>Sell</th>
             <th>P/L</th>
-            <th style="border: none;"></th>
-            <th style="border: none;"></th>
+            <th>LTP</th>
         </tr>
     </thead>
     <tbody>
@@ -52,6 +52,7 @@
         <td><button type="submit" value="{{i.button_id}}" name="{{i.button_id}}" class="btn btn-outline-danger" >X  </button></td>
         <td>{{i.tikr}}</td> 
         <td>{{i.entry}}</td>
+        <td>{{i.exit}}</td>
         <td>{{i.buy}}</td> 
         <td>{{i.qty}}</td> 
         <td>{{i.buy_value}}</td>        
@@ -67,17 +68,9 @@
         <td title="P/L : {{i.R1}}"  style="background-color:{{i.R1_color}};">{{i.R1_p}}</td>        
         <td title="P/L : {{i.R2}}"  style="background-color:{{i.R2_color}};">{{i.R2_p}}</td>        
         <td title="P/L : {{i.R3}}"  style="background-color:{{i.R3_color}};">{{i.R3_p}}</td>
+        <td>{{i.sell}}</td>
+        <td style="background-color:{{i.final_pl_color}};">{{i.final_p_l}}</td>        
         <td>{{i.ltp}}</td>
-        <td style="background-color:{{i.pl_color}};">{{i.pl}}</td>
-        <td style="border: none;">
-            <input name="{{i.sell_text_id}}" type="number" step="0.05" style="width:70px">
-        </td>
-        <!-- {% for btn_id,company in btn_sets %}
-                {{company}}
-        {% endfor %} -->
-        <td style="border: none;">
-            <button type="submit" name="{{i.sell_button_id}}" class="btn btn-info">Sell</button>            
-        </td>
         </tr> 
     {% endfor %} 
     {% endif %}
