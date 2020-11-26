@@ -29,7 +29,62 @@ def get_sectors_list(sector_img_path):
 	sectors = [x[0] for x in os.walk(s)][1:]
 	sectors = [x.split(s+'\\')[1] for x in sectors]
 	return sectors
+
 def find_ltp(holdings):
+    def get_ltp_dict(tikr_list):
+        def get_gsheet():
+            #        import json
+            import gspread
+            #        import pandas as pd
+            from oauth2client.service_account import ServiceAccountCredentials
+            scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+            creds = ServiceAccountCredentials.from_json_keyfile_name(r'C:\Users\prave\Documents\GitHub\Market-Analysis\Money App-a10f1f368e5b.json', scope)
+            # authorize the clientsheet 
+            client = gspread.authorize(creds)
+            # get the instance of the Spreadsheet
+            sheet = client.open('Strategic Calls').worksheet('Sheet1')
+            return sheet              
+        sheet = get_gsheet()
+        r=2
+        for i in range(2,1000):
+            val = sheet.cell(i,1).value
+            sheet.update_cell(i,1,'')
+            if val=='':
+                break
+        r=2
+        for i in tikr_list:
+            sheet.update_cell(r,1,i)
+            r+=1
+
+        time.sleep(2)
+        df = sheet.get_all_records()
+        tikr_lst=[]
+        ltp_lst=[]
+        for i in df:
+            tikr_lst.append(i['TIKR'])
+            ltp_lst.append(i['LTP'])
+        dict={}
+        for tikr,ltp in zip(tikr_lst,ltp_lst):
+            dict[tikr]=ltp
+        print(dict) 
+
+        for key in tikr_list:
+            obj = ltp_tikrs.objects.get(tikr=key)
+            obj.ltp = dict[key]
+            obj.save()
+        print('updated LTP from shts')
+        return dict
+    tikr_list =list(holdings.tikr.value_counts().index)   
+        #cell_list = sheet.range("A2:A1000")
+    try:
+        print("using shts")
+        dict = get_ltp_dict(tikr_list)
+        return dict
+    except:
+        print("Not able to fetch shts")
+    
+
+def find_ltp2(holdings):
     import yfinance as yf
     tikr_list =list(holdings.tikr.value_counts().index)
     dict={}
