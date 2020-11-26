@@ -18,8 +18,6 @@ class Holdings(models.Model):
     entrydate = models.DateTimeField(default=datetime.now, blank=True)
     sell = models.FloatField(default=0.0)
     sell_status = models.BooleanField(default=False)
-
-    exitdate = models.DateTimeField(auto_now_add=True)
-
+    exitdate = models.DateTimeField(default=datetime.now, blank=True)
     def __str__(self):
         return f"{self.tikr}|{self.buy}|{self.qty}|{self.sl}|{self.t}|{self.entrydate}|{self.sell_status}|{self.sell}|{self.exitdate}"

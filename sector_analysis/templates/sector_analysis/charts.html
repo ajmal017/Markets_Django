@@ -15,29 +15,32 @@
     }
 
     function remove_comp_buttons(){
-                while(document.getElementById("comp_nav").getElementsByTagName("button").length>0){
-                    btn = document.getElementById("comp_nav").getElementsByTagName("button")[0];
-                    btn.remove();
-
-                }
+        while(document.getElementById('comp_nav').getElementsByClassName('btn btn-info m-1').length>0){
+            btn = document.getElementById('comp_nav').getElementsByClassName('btn btn-info m-1')[0];
+            btn.remove();
+        }
             }
 
     function create_button_company(sector,tikrs){
         if (Object.keys(dict).indexOf(sector)!=-1){
+                    console.log(dict);
                     col_change(sector);
                     for (i = 0, len = tikrs.length; i < len; i++) {
+                        console.log(company);
                         var div = document.getElementById('comp_nav');
-                        var btn = document.createElement("BUTTON");
-                        btn.type = "submit"
-                        btn.innerText = tikrs[i];
-                        btn.id = 'comp_'+tikrs[i];
-                        btn.className = "btn btn-primary btn-sm m-1";
-                        btn.name = 'comp_'+tikrs[i]+'_sector_'+sector;
+                        var btn = document.createElement('a');                        
+                        var company = tikrs[i];
+                        var createAText = document.createTextNode(company);
+                        btn.setAttribute('href', company);
+                        btn.appendChild(createAText);
+                        btn.innerText = company;
+                        btn.className = "btn btn-info m-1";
+                        btn.name = 'comp_'+company+'_sector_'+sector;
                         div.appendChild(btn);
                     }
                 }
     }
-    function create_buttons(sector,sect){
+    function create_buttons(sector){
                 var tikrs = dict[sector];
                 remove_comp_buttons();
                 create_button_company(sector,tikrs);
@@ -141,7 +144,7 @@
         <div id="sect_nav">
             {% for sector in sectors %}
             <button button type="button" class="btn btn-light btn-sm m-1" 
-            onclick="create_buttons('{{sector}}','{{sect}}') " >{{ sector }}</button>
+            onclick="create_buttons('{{sector}}') " >{{ sector }}</button>
             {% endfor %}
         </div>
            {% csrf_token %} 
@@ -149,7 +152,7 @@
             
         <div id="comp_nav">
             {% for btn_id,company in btn_sets %}
-            <button type="submit"  name='{{btn_id}}' id='{{btn_id}}' class="btn btn-primary btn-sm m-1" >{{company}}</button> 
+            <a class="btn btn-info m-1" type="button" href="{% url 'sector_analysis:charts' company %}" >{{company}}</a>
             {% endfor %}
         </div>
             
@@ -208,7 +211,12 @@
             
         </div>
         <div style="width: 100%;">
-            <button type="submit" class="btn btn-outline-success " style="width:100% ">Add to Portfolio</button>
+            <div style="float:left;width:25%;  "> 
+            <input type="number" value="{{ltp}}" class="form-control bg-warning mb-1 d-inline-block" id="cmp__ltp" style="text-align: center;width:80%;" disabled placeholder="Buy Val.">                
+            </div>
+            <div style="float:left;width:75%;  ">           
+                <button type="submit" class="btn btn-outline-success " name="btn_portfolio" style="width:100% ">Add to Portfolio</button>
+            </div>
         </div>
     </div>
     <!-- <div style="height:16%; float:left;width:15%" >

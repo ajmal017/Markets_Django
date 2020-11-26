@@ -50,7 +50,7 @@
     {% for i in d %} 
       <tr> 
         <td><button type="submit" value="{{i.button_id}}" name="{{i.button_id}}" class="btn btn-outline-danger" >X  </button></td>
-        <td>{{i.tikr}}</td> 
+        <td><a href="{% url 'sector_analysis:charts' i.tikr %}">{{i.tikr}}</a></td>  
         <td>{{i.entry}}</td>
         <td>{{i.exit}}</td>
         <td>{{i.buy}}</td> 

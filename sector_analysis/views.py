@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render,reverse,redirect    
+from django.http import HttpResponse,HttpResponseRedirect
 import json
 import pandas as pd
 from bokeh.plotting import figure, output_file, show 
@@ -13,50 +13,41 @@ from plotly.graph_objs import Scatter
 import plotly.express as px
 import json
 
-mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
-mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
-mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
+# mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
+# mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
+# mdf_15m = pd.read_csv(r'C:\Users\prave\Documents\GitHub\Market-Analysis\mdf_15m.csv')
 import bs4,requests
 def parsePrice(FB):
+    FB=FB+'.NS'
     url = requests.get('https://finance.yahoo.com/quote/' + FB + '?p=' + FB)
     soup = bs4.BeautifulSoup(url.text, features="html.parser")
     price = soup.find_all("div", {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0].find('span').text
     price = float(price.replace(',',''))
     return price
-def get_sectors_list(sector_img_path):
-	import os
-	s = os.getcwd()+sector_img_path
-	sectors = [x[0] for x in os.walk(s)][1:]
-	sectors = [x.split(s+'\\')[1] for x in sectors]
-	return sectors
+# def get_sectors_list(sector_img_path):
+# 	import os
+# 	s = os.getcwd()+sector_img_path
+# 	sectors = [x[0] for x in os.walk(s)][1:]
+# 	sectors = [x.split(s+'\\')[1] for x in sectors]
+# 	return sectors
+def redirect_view(request):
+        return redirect('/sector_analysis/charts/RELIANCE')
+
 
 def find_ltp(holdings):
     def get_ltp_dict(tikr_list):
-        def get_gsheet():
-            #        import json
-            import gspread
-            #        import pandas as pd
-            from oauth2client.service_account import ServiceAccountCredentials
-            scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-            creds = ServiceAccountCredentials.from_json_keyfile_name(r'C:\Users\prave\Documents\GitHub\Market-Analysis\Money App-a10f1f368e5b.json', scope)
-            # authorize the clientsheet 
-            client = gspread.authorize(creds)
-            # get the instance of the Spreadsheet
-            sheet = client.open('Strategic Calls').worksheet('Sheet1')
-            return sheet              
-        sheet = get_gsheet()
-        r=2
-        for i in range(2,1000):
-            val = sheet.cell(i,1).value
-            sheet.update_cell(i,1,'')
-            if val=='':
-                break
-        r=2
-        for i in tikr_list:
-            sheet.update_cell(r,1,i)
-            r+=1
-
-        time.sleep(2)
+        print("Get ltp dict")
+        import gspread
+        from oauth2client.service_account import ServiceAccountCredentials
+        scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+        creds = ServiceAccountCredentials.from_json_keyfile_name(r'C:\Users\prave\Documents\GitHub\Market-Analysis\Money App-a10f1f368e5b.json', scope)
+        client = gspread.authorize(creds)   
+        sheet = client.open('Strategic Calls').worksheet('Sheet1')
+        print("Got sheet 1")
+        start_time = datetime.now().strftime("%H:%M:%S")
+        print("Starts at "+start_time)         
+        
+        # time.sleep(2)
         df = sheet.get_all_records()
         tikr_lst=[]
         ltp_lst=[]
@@ -64,25 +55,44 @@ def find_ltp(holdings):
             tikr_lst.append(i['TIKR'])
             ltp_lst.append(i['LTP'])
         dict={}
-        for tikr,ltp in zip(tikr_lst,ltp_lst):
-            dict[tikr]=ltp
-        print(dict) 
-
-        for key in tikr_list:
-            obj = ltp_tikrs.objects.get(tikr=key)
-            obj.ltp = dict[key]
-            obj.save()
-        print('updated LTP from shts')
+        # print(tikr_lst)
+        # print(ltp_lst)
+        for tikr_,ltp_ in zip(tikr_lst,ltp_lst):
+            dict[tikr_]=ltp_
+            try:
+                obj = ltp_tikrs.objects.get(tikr=tikr_)
+                obj.ltp = ltp_
+                obj.save()
+            except:
+                ltp_tikrs.objects.create(tikr=tikr_,ltp=ltp_)
+                
+        end_time = datetime.now().strftime("%H:%M:%S")
+        print('updated LTP from shts at ' + end_time)
         return dict
+
     tikr_list =list(holdings.tikr.value_counts().index)   
         #cell_list = sheet.range("A2:A1000")
-    try:
+    print(tikr_list)
+    if len(tikr_list)>0:
         print("using shts")
-        dict = get_ltp_dict(tikr_list)
-        return dict
-    except:
-        print("Not able to fetch shts")
+        try:
+            dict = get_ltp_dict(tikr_list)
+            return dict
+        except:
+            print("Not able to fetch shts")
+            ltp_tikrs_df = pd.DataFrame(ltp_tikrs.objects.values())
+            dict={}
+            for tikr,ltp in zip(ltp_tikrs_df['tikr'],ltp_tikrs_df['ltp']):
+                dict[tikr]=ltp
+            return dict
     
+def find_ltp_exiting(holdings):
+    ltp_tikrs_df = pd.DataFrame(ltp_tikrs.objects.values())
+    dict={}
+    for tikr,ltp in zip(ltp_tikrs_df['tikr'],ltp_tikrs_df['ltp']):
+        dict[tikr]=ltp
+    return dict
+
 
 def find_ltp2(holdings):
     import yfinance as yf
@@ -196,11 +206,12 @@ def color_risk_reward(holdings,ocheck):
     return holdings
 def holdings_df_prep_to_html(latest_ltp,sell_status,ocheck):
     holdings = gen_pd_holding()
-    dict = get_or_create_ltp()
+    dict = find_ltp_exiting(holdings)
     if latest_ltp:
         dict = find_ltp(holdings)
     else:
         pass
+    # print(dict)
     holdings['ltp'] = [dict[x] for x in holdings['tikr']]   
     holdings['pl'] = (holdings['ltp']-holdings['buy'])*holdings['qty']
     holdings = color_risk_reward(holdings,ocheck)
@@ -210,7 +221,7 @@ def portfolio(request):
     if request.method=="POST":
         # print(list(request.POST.keys()))
         keys_ = list(request.POST.keys())
-        print(keys_)
+        # print(keys_)
         # check if update_ltp was clicked 
         if 'update_ltp' in keys_:
             print('Updating LTP')
@@ -253,7 +264,7 @@ def portfolio(request):
                 h = Holdings.objects.get(pk=id_)
                 h.sell = sell
                 h.sell_status = True
-                # h.exitdate = datetime.now
+                h.exitdate = datetime.now()
                 time_happen = "Sold " + h.tikr + " at " + str(h.sell)
                 h.save()
 
@@ -350,6 +361,13 @@ def get_sect_comps():
     for i in mdf.index:
         dict[mdf.loc[i,'industry']].append(mdf.loc[i,'tikr'])
     return dict
+
+def check_valid_tikr(tikr):
+    import pandas as pd
+    mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\f_mdf_15m.csv")
+    tikrs = list(mdf['tikr'].value_counts().index)
+    return tikr in tikrs
+
 def find_sect_for_tikr(tikr):
     mdf = pd.read_csv(r"C:\Users\prave\Documents\GitHub\Market-Analysis\f_mdf_15m.csv")
     industry= list(mdf[mdf['tikr']==tikr].industry)
@@ -361,55 +379,71 @@ def gen_btn_ids_comps(tikr):
     companies = sect_comps[sect]
     btn_ids_comps = ['comp_'+x+'_sector_'+sect for x in companies]
     return btn_ids_comps
-def charts(request):
+
+def charts(request,tikr_):
     if request.method=="POST":
         import numpy as np
         req_post_keys = (list(request.POST.keys()))
-        comp = [x for x in req_post_keys if 'comp_' in x]
-        if  len(comp)>0:
-            # btn = [x for x in s if 'comp_' in req_post_keys][0].split('comp_')[1]
-            s = comp[0]
-            company = s[:s.find('_sector')].strip('comp_')
-            sector = s[s.find('_sector'):].strip('_sector_')            
-            print(company)
-            print(sector)
-            tikr = company
-            sect = find_sect_for_tikr(tikr)
-            script_1w,div_1w,script_1d,div_1d,script_15,div_15 = gen_all_scripts_divs(tikr)   
-            sect_comps = get_sect_comps()
-            sectors = list(sect_comps.keys())
-            dict = json.dumps(sect_comps)
-            btn_id_comps = gen_btn_ids_comps(tikr)
-            companies =  sect_comps[sect]
+        # comp = [x for x in req_post_keys if 'comp_' in x]
+        # if  len(comp)>0:
+        #     # btn = [x for x in s if 'comp_' in req_post_keys][0].split('comp_')[1]
+        #     s = comp[0]
+        #     company = s[:s.find('_sector')].strip('comp_')
+        #     sector = s[s.find('_sector'):].strip('_sector_')            
+        #     print(company)
+        #     print(sector)
+        #     tikr = company
+        #     sect = find_sect_for_tikr(tikr)
+        #     script_1w,div_1w,script_1d,div_1d,script_15,div_15 = gen_all_scripts_divs(tikr)   
+        #     sect_comps = get_sect_comps()
+        #     sectors = list(sect_comps.keys())
+        #     dict = json.dumps(sect_comps)
+        #     btn_id_comps = gen_btn_ids_comps(tikr)
+        #     companies =  sect_comps[sect]
             
-            #Feed them to the Django template.
-            return render(request, 'sector_analysis/charts.html',
-                    {'script_15' : script_15 , 'div_15' : div_15 ,
-                    'script_1d' : script_1d , 'div_1d' : div_1d ,
-                    'script_1w' : script_1w , 'div_1w' : div_1w ,
-                    'sectors': sectors,
-                    'dict' : dict,
-                    'sect' : sect,
-                    'btn_sets':zip(btn_id_comps,companies),
-                    'company':tikr
-                    } ) 
-        else:
-            if 'tkr' in req_post_keys:
-                tikr = request.POST['tkr']
-                buy = float(request.POST['B'])
-                qty = int(request.POST['Q'])
-                sl = float(request.POST['SL'])
-                target = float(request.POST['T'])
-                Holdings.objects.create(
-                tikr = tikr,
-                buy = buy,
-                qty = qty,
-                sl = sl,
-                t=target,
-                entrydate=datetime.now()    ,
-                )
-                print(req_post_keys)
-    tikr = "MARICO"
+        #     try:
+        #         ltp = parsePrice(tikr)
+        #     except:
+        #         ltp = "N/A"
+
+        #     #Feed them to the Django template.
+        #     return render(request, 'sector_analysis/charts.html',
+        #             {'script_15' : script_15 , 'div_15' : div_15 ,
+        #             'script_1d' : script_1d , 'div_1d' : div_1d ,
+        #             'script_1w' : script_1w , 'div_1w' : div_1w ,
+        #             'sectors': sectors,
+        #             'dict' : dict,
+        #             'sect' : sect,
+        #             'btn_sets':zip(btn_id_comps,companies),
+        #             'company':tikr,
+        #             'ltp':ltp
+        #             } ) 
+        # if len(comp)>0:        
+        #     s = comp[0]
+        #     company = s[:s.find('_sector')].strip('comp_')
+        #     s = '/sector_analysis/charts/'+company
+        #     print(s)
+        #     redirect(s)
+        if 'btn_portfolio' in req_post_keys:
+            print("Adding Portfolio...")
+            tikr = request.POST['tkr']
+            buy = float(request.POST['B'])
+            qty = int(request.POST['Q'])
+            sl = float(request.POST['SL'])
+            target = float(request.POST['T'])
+            Holdings.objects.create(
+            tikr = tikr,
+            buy = buy,
+            qty = qty,
+            sl = sl,
+            t=target,
+            entrydate=datetime.now()    ,
+            )
+            # print(req_post_keys)
+
+    tikr = 'RELIANCE'
+    if tikr_ != '' and check_valid_tikr(tikr_):
+        tikr = tikr_
     sect = find_sect_for_tikr(tikr)
     script_1w,div_1w,script_1d,div_1d,script_15,div_15 = gen_all_scripts_divs(tikr)   
     sect_comps = get_sect_comps()
@@ -417,7 +451,11 @@ def charts(request):
     dict = json.dumps(sect_comps)
     btn_id_comps = gen_btn_ids_comps(tikr)
     companies =  sect_comps[sect]
-    
+    try:
+        ltp = parsePrice(tikr)
+    except:
+        ltp = "N/A"
+
     #Feed them to the Django template.
     return render(request, 'sector_analysis/charts.html',
             {'script_15' : script_15 , 'div_15' : div_15 ,
@@ -427,7 +465,8 @@ def charts(request):
             'dict' : dict,
             'sect' : sect,
             'btn_sets':zip(btn_id_comps,companies),
-            'company':tikr
+            'company':tikr,
+            'ltp':ltp
             } ) 
 def completed(request):
     if request.method=="POST":
@@ -475,11 +514,13 @@ def completed(request):
 # Work on bringing calculations to charts - completed
 # Add sell and exit date to Portfolio - completed
 # Develop page for closed trade - completed
+# LTP with google sheets - completed
 
-# LTP with google sheets
+# Link portfolio to charts - ongoing
+# Link charts with tikr on website link - ongoing  
 
+# summary within portfolio , summary within closed trades
 # Work on highlighting selected industry (no priority)
-# Link portfolio to charts 
 # Develop Summary of trading 
 # Develop scanner for important trade observations
 # Add candlestick to bokeh 
@@ -489,7 +530,7 @@ def completed(request):
 # Rename x index in charts with datetimes
 # Create watchlist
 # On charts : Create a line for entry if already present and also point the date on 1d and time in 15m based on entry time
-# Link charts with tikr on website link
+
 
 # def find_ltp_render(holdings):
 #     import yfinance as yf
